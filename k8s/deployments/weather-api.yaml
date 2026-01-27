@@ -31,6 +31,11 @@ spec:
             capabilities:
               drop:
                 - ALL
+          env:
+            - name: UV_CACHE_DIR
+              value: /tmp/.uv-cache
+            - name: HOME
+              value: /tmp
           startupProbe:
             httpGet:
               path: /health

@@ -33,7 +33,7 @@ EXPOSE 8000
 
 # Health check for container orchestration
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+    CMD /app/.venv/bin/python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
-# Run the application
-CMD ["uv", "run", "uvicorn", "weather_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the application directly (avoid UV runtime modifications for read-only filesystem)
+CMD ["/app/.venv/bin/uvicorn", "weather_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
