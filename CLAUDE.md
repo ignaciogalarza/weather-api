@@ -46,11 +46,30 @@ k8s/
 - Pydantic models for request/response schemas
 - Tests required for all new features
 
+## Git Hooks
+
+The project includes a pre-commit hook that enforces code quality:
+
+```bash
+# Install hooks (run once after cloning)
+./scripts/install-hooks.sh
+```
+
+The pre-commit hook runs:
+1. **Ruff linting** - Code style and errors
+2. **MyPy type checking** - Static type analysis
+3. **Pytest** - All tests must pass
+
+To bypass temporarily: `git commit --no-verify`
+
 ## Common Commands
 
 ```bash
 # Install dependencies
 uv sync
+
+# Install Git hooks
+./scripts/install-hooks.sh
 
 # Run development server
 uv run uvicorn weather_api.main:app --reload
