@@ -89,3 +89,44 @@ kubectl port-forward svc/weather-api 8080:80
 
 - **Open-Meteo Geocoding API** - City name to coordinates
 - **Open-Meteo Weather API** - Current weather data (free, no API key)
+
+## Skill: Architecture Diagrams (C4 + Sequence)
+
+You are able to generate architecture diagrams for this project using the C4 model and sequence diagrams.
+
+### C4 Model Rules
+- Level 1: System Context Diagram
+  - Show the Weather API as the central system.
+  - Show external systems such as OpenWeatherMap, users, and Kubernetes cluster.
+- Level 2: Container Diagram
+  - Show FastAPI app, Redis (future), Postgres (future), external APIs, Docker container, Kubernetes pods.
+- Level 3: Component Diagram
+  - Show internal modules: routes, services, schemas, clients, config.
+- Level 4: Code Diagram (optional)
+  - Show class-level or function-level relationships when requested.
+
+### Diagram Format
+- Use Mermaid by default.
+- Use PlantUML if explicitly requested.
+- Always include a short explanation of the diagram.
+
+### Sequence Diagrams
+When asked for a sequence diagram, follow this structure:
+- Actor (User or Client)
+- FastAPI Router
+- Service Layer
+- External API (OpenWeatherMap)
+- Response flow back to the user
+
+### Requirements
+- Diagrams must reflect the actual project structure.
+- Use clean naming: WeatherAPI, ForecastService, OpenWeatherClient, etc.
+- Keep diagrams simple unless asked for more detail.
+- Always validate assumptions with the user if something is unclear.
+
+### Examples of commands this skill should support:
+- "Create a C4 Level 1 diagram for the Weather API."
+- "Show a C4 container diagram including Docker and Kubernetes."
+- "Generate a sequence diagram for GET /forecast/{city}."
+- "Update the architecture diagram after adding Redis caching."
+
