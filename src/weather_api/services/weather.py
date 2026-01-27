@@ -160,9 +160,7 @@ async def get_current_weather(
                     status_code=response.status_code,
                     duration_ms=round(duration * 1000, 2),
                 )
-                raise WeatherServiceError(
-                    f"Weather API error: {response.status_code}"
-                )
+                raise WeatherServiceError(f"Weather API error: {response.status_code}")
 
             data = response.json()
             current = data["current"]

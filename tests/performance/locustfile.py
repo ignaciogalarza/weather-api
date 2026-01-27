@@ -1,6 +1,7 @@
 """Load test scenarios for Weather API using Locust."""
 
 import random
+from typing import ClassVar
 
 from locust import HttpUser, between, tag, task
 
@@ -11,7 +12,7 @@ class WeatherAPIUser(HttpUser):
     wait_time = between(0.5, 2.0)
 
     # Sample cities for testing
-    CITIES = [
+    CITIES: ClassVar[list[str]] = [
         "London",
         "Paris",
         "Tokyo",
@@ -29,7 +30,7 @@ class WeatherAPIUser(HttpUser):
         "Seoul",
     ]
 
-    POPULAR_CITIES = ["London", "New York", "Tokyo", "Paris"]
+    POPULAR_CITIES: ClassVar[list[str]] = ["London", "New York", "Tokyo", "Paris"]
 
     @task(1)
     @tag("health")
@@ -87,7 +88,7 @@ class HeavyUser(HttpUser):
     wait_time = between(0.1, 0.5)
     weight = 1
 
-    CITIES = ["London", "Paris", "Tokyo", "Berlin", "Sydney"]
+    CITIES: ClassVar[list[str]] = ["London", "Paris", "Tokyo", "Berlin", "Sydney"]
 
     @task
     def rapid_forecast(self) -> None:

@@ -11,10 +11,21 @@ from weather_api.services.weather import (
     get_current_weather,
 )
 
-router = APIRouter()
+router = APIRouter(tags=["forecast"])
 
 
-@router.get("/forecast/{city}")
+@router.get(
+    "/forecast/{city}",
+    response_model=ForecastResponse,
+    summary="Get weather forecast for a city",
+    description="Returns current weather conditions including temperature, humidity, "
+    "wind speed, and weather conditions for the specified city.",
+    responses={
+        200: {"description": "Weather data retrieved successfully"},
+        404: {"description": "City not found"},
+        503: {"description": "Weather service unavailable"},
+    },
+)
 async def get_forecast(city: str) -> ForecastResponse:
     """Get current weather forecast for a city."""
     try:

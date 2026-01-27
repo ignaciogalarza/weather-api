@@ -6,8 +6,8 @@ from weather_api.observability.tracing import configure_tracing, instrument_fast
 
 __all__ = [
     "configure_logging",
-    "get_logger",
-    "setup_metrics",
     "configure_tracing",
+    "get_logger",
     "instrument_fastapi",
+    "setup_metrics",
 ]

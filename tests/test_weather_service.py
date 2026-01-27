@@ -25,11 +25,7 @@ class TestGetCoordinates:
         respx.get(GEOCODING_URL).mock(
             return_value=Response(
                 200,
-                json={
-                    "results": [
-                        {"latitude": 40.7128, "longitude": -74.0060}
-                    ]
-                },
+                json={"results": [{"latitude": 40.7128, "longitude": -74.0060}]},
             )
         )
 
@@ -41,9 +37,7 @@ class TestGetCoordinates:
     @respx.mock
     async def test_raises_city_not_found_for_empty_results(self) -> None:
         """Should raise CityNotFoundError when results array is empty."""
-        respx.get(GEOCODING_URL).mock(
-            return_value=Response(200, json={"results": []})
-        )
+        respx.get(GEOCODING_URL).mock(return_value=Response(200, json={"results": []}))
 
         with pytest.raises(CityNotFoundError, match="City not found"):
             await get_coordinates("NonexistentCity")
@@ -51,9 +45,7 @@ class TestGetCoordinates:
     @respx.mock
     async def test_raises_city_not_found_for_missing_results_key(self) -> None:
         """Should raise CityNotFoundError when results key is missing."""
-        respx.get(GEOCODING_URL).mock(
-            return_value=Response(200, json={})
-        )
+        respx.get(GEOCODING_URL).mock(return_value=Response(200, json={}))
 
         with pytest.raises(CityNotFoundError, match="City not found"):
             await get_coordinates("InvalidCity")

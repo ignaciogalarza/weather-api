@@ -1,7 +1,5 @@
 """OpenTelemetry tracing configuration."""
 
-import os
-
 from fastapi import FastAPI
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -24,9 +22,6 @@ def configure_tracing(
         otlp_endpoint: OTLP collector endpoint (e.g., "http://tempo:4317").
         console_export: If True, also export traces to console (for debugging).
     """
-    # Get endpoint from environment if not provided
-    if otlp_endpoint is None:
-        otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
 
     # Create resource with service info
     resource = Resource.create(

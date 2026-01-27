@@ -58,9 +58,7 @@ async def test_get_forecast_success() -> None:
 @respx.mock
 async def test_get_forecast_city_not_found() -> None:
     """Test 404 response for unknown city."""
-    respx.get(GEOCODING_URL).mock(
-        return_value=Response(200, json={})
-    )
+    respx.get(GEOCODING_URL).mock(return_value=Response(200, json={}))
 
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"

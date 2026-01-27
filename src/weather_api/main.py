@@ -1,11 +1,11 @@
 """FastAPI application entry point."""
 
-import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from weather_api.config import settings
 from weather_api.observability import (
     configure_logging,
     configure_tracing,
@@ -20,14 +20,15 @@ from weather_api.routes.forecast import router as forecast_router
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan handler for startup/shutdown."""
     # Startup
-    json_logs = os.getenv("LOG_FORMAT", "json") == "json"
-    log_level = os.getenv("LOG_LEVEL", "INFO")
-    configure_logging(json_format=json_logs, log_level=log_level)
+    configure_logging(
+        json_format=settings.log_format == "json",
+        log_level=settings.log_level,
+    )
 
-    # Configure tracing (will use OTEL_EXPORTER_OTLP_ENDPOINT env var if set)
     configure_tracing(
-        service_name="weather-api",
-        console_export=os.getenv("OTEL_CONSOLE_EXPORT", "false").lower() == "true",
+        service_name=settings.service_name,
+        otlp_endpoint=settings.otel_exporter_otlp_endpoint,
+        console_export=settings.otel_console_export,
     )
 
     yield
@@ -38,7 +39,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     title="Weather API",
     description="Weather forecast API",
-    version="0.1.0",
+    version=settings.service_version,
     lifespan=lifespan,
 )
 
