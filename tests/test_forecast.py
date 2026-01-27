@@ -72,8 +72,8 @@ async def test_get_forecast_city_not_found() -> None:
 
 
 @respx.mock
-async def test_get_forecast_service_error() -> None:
-    """Test 503 response when external API fails."""
+async def test_get_forecast_geocoding_error() -> None:
+    """Test 503 response when geocoding API fails."""
     respx.get(GEOCODING_URL).mock(return_value=Response(500))
 
     async with AsyncClient(
@@ -82,3 +82,55 @@ async def test_get_forecast_service_error() -> None:
         response = await client.get("/forecast/London")
 
     assert response.status_code == 503
+
+
+@respx.mock
+async def test_get_forecast_weather_api_error() -> None:
+    """Test 503 response when weather API fails after successful geocoding."""
+    respx.get(GEOCODING_URL).mock(
+        return_value=Response(
+            200,
+            json={"results": [{"latitude": 51.5074, "longitude": -0.1278}]},
+        )
+    )
+    respx.get(WEATHER_URL).mock(return_value=Response(503))
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        response = await client.get("/forecast/London")
+
+    assert response.status_code == 503
+
+
+@respx.mock
+async def test_get_forecast_with_spaces_in_city_name() -> None:
+    """Test forecast for city with spaces in name."""
+    respx.get(GEOCODING_URL).mock(
+        return_value=Response(
+            200,
+            json={"results": [{"latitude": 40.7128, "longitude": -74.0060}]},
+        )
+    )
+    respx.get(WEATHER_URL).mock(
+        return_value=Response(
+            200,
+            json={
+                "current": {
+                    "temperature_2m": 18.0,
+                    "relative_humidity_2m": 55,
+                    "wind_speed_10m": 10.0,
+                    "weather_code": 0,
+                }
+            },
+        )
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        response = await client.get("/forecast/New%20York")
+
+    assert response.status_code == 200
+    assert response.json()["city"] == "New York"
+    assert response.json()["conditions"] == "Clear sky"
