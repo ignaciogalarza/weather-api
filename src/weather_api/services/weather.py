@@ -18,6 +18,9 @@ tracer = trace.get_tracer(__name__)
 GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search"
 WEATHER_URL = "https://api.open-meteo.com/v1/forecast"
 
+# HTTP client timeout in seconds (prevents hung connections)
+HTTP_TIMEOUT = 10.0
+
 # WMO Weather interpretation codes
 # https://open-meteo.com/en/docs
 WMO_CODES: dict[int, str] = {
@@ -63,7 +66,7 @@ async def get_coordinates(city: str) -> Coordinates:
         start_time = time.perf_counter()
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
                 response = await client.get(
                     GEOCODING_URL,
                     params={"name": city, "count": 1},
@@ -136,7 +139,7 @@ async def get_current_weather(
         start_time = time.perf_counter()
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
                 response = await client.get(
                     WEATHER_URL,
                     params={

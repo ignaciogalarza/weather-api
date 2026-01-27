@@ -1,6 +1,8 @@
 """Forecast route handlers."""
 
-from fastapi import APIRouter, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, HTTPException, Path
 
 from weather_api.schemas import ForecastResponse
 from weather_api.services.weather import (
@@ -26,7 +28,9 @@ router = APIRouter(tags=["forecast"])
         503: {"description": "Weather service unavailable"},
     },
 )
-async def get_forecast(city: str) -> ForecastResponse:
+async def get_forecast(
+    city: Annotated[str, Path(min_length=1, max_length=100, description="City name")],
+) -> ForecastResponse:
     """Get current weather forecast for a city."""
     try:
         coords = await get_coordinates(city)
