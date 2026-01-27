@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+
+# Environment variables
+.env
+
+# UV lock file (auto-generated)
+uv.lock
+
+# OS files
+.DS_Store
