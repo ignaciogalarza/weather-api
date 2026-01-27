@@ -38,7 +38,7 @@ def setup_metrics(app: FastAPI) -> Instrumentator:
     instrumentator = Instrumentator(
         should_group_status_codes=True,
         should_ignore_untemplated=True,
-        should_respect_env_var=True,
+        should_respect_env_var=False,
         should_instrument_requests_inprogress=True,
         excluded_handlers=["/health", "/metrics"],
         inprogress_name="weather_api_http_requests_inprogress",

@@ -14,15 +14,9 @@ data:
           - targets: ['localhost:9090']
 
       - job_name: 'weather-api'
-        kubernetes_sd_configs:
-          - role: pod
-        relabel_configs:
-          - source_labels: [__meta_kubernetes_pod_label_app]
-            regex: weather-api
-            action: keep
-          - source_labels: [__meta_kubernetes_pod_ip]
-            target_label: __address__
-            replacement: '${1}:8000'
+        static_configs:
+          - targets: ['weather-api:80']
+        metrics_path: /metrics
 ---
 apiVersion: apps/v1
 kind: Deployment
