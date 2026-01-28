@@ -3,7 +3,9 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 
 from weather_api.config import settings
 from weather_api.observability import (
@@ -13,7 +15,9 @@ from weather_api.observability import (
     setup_metrics,
 )
 from weather_api.observability.middleware import RequestLoggingMiddleware
+from weather_api.ratelimit import limiter
 from weather_api.routes.forecast import router as forecast_router
+from weather_api.services.cache import close_cache, init_cache
 
 
 @asynccontextmanager
@@ -31,9 +35,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         console_export=settings.otel_console_export,
     )
 
+    # Initialize Redis cache
+    await init_cache()
+
     yield
 
-    # Shutdown (cleanup if needed)
+    # Shutdown
+    await close_cache()
 
 
 app = FastAPI(
@@ -42,6 +50,23 @@ app = FastAPI(
     version=settings.service_version,
     lifespan=lifespan,
 )
+
+# Add rate limiter state
+app.state.limiter = limiter
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_exceeded_handler(
+    request: Request, exc: RateLimitExceeded
+) -> JSONResponse:
+    """Handle rate limit exceeded errors."""
+    retry_after = getattr(exc, "retry_after", 60)
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Rate limit exceeded"},
+        headers={"Retry-After": str(retry_after)},
+    )
+
 
 # Add observability middleware
 app.add_middleware(RequestLoggingMiddleware)

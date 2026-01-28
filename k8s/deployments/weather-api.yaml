@@ -36,6 +36,8 @@ spec:
               value: /tmp/.uv-cache
             - name: HOME
               value: /tmp
+            - name: REDIS_URL
+              value: redis://redis:6379
           startupProbe:
             httpGet:
               path: /health

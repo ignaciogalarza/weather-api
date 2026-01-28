@@ -17,3 +17,7 @@ uv.lock
 
 # OS files
 .DS_Store
+
+# Kubernetes secrets (keep templates)
+k8s/secrets/*.yaml
+!k8s/secrets/*.yaml.template

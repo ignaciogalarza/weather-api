@@ -24,6 +24,19 @@ class Settings(BaseSettings):
     service_name: str = "weather-api"
     service_version: str = __version__
 
+    # Rate limiting
+    rate_limit_enabled: bool = True
+    rate_limit_default: str = "100/minute"
+    rate_limit_forecast: str = "30/minute"
+    rate_limit_storage: str = "memory"  # "memory" or "redis"
+
+    # Redis cache
+    redis_url: str | None = None  # e.g., "redis://localhost:6379"
+    redis_password: str | None = None
+    cache_enabled: bool = True
+    cache_coordinates_ttl: int = 2592000  # 30 days in seconds
+    cache_weather_ttl: int = 900  # 15 minutes in seconds
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 

@@ -2,8 +2,10 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Request
 
+from weather_api.config import settings
+from weather_api.ratelimit import limiter
 from weather_api.schemas import ForecastResponse
 from weather_api.services.weather import (
     CityNotFoundError,
@@ -25,10 +27,13 @@ router = APIRouter(tags=["forecast"])
     responses={
         200: {"description": "Weather data retrieved successfully"},
         404: {"description": "City not found"},
+        429: {"description": "Rate limit exceeded"},
         503: {"description": "Weather service unavailable"},
     },
 )
+@limiter.limit(settings.rate_limit_forecast)
 async def get_forecast(
+    request: Request,
     city: Annotated[str, Path(min_length=1, max_length=100, description="City name")],
 ) -> ForecastResponse:
     """Get current weather forecast for a city."""

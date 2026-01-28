@@ -20,6 +20,8 @@ dependencies = [
     "pydantic-settings>=2.7.0",
     "structlog>=25.5.0",
     "uvicorn[standard]>=0.40.0",
+    "slowapi>=0.1.9",
+    "redis>=5.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -27,6 +29,7 @@ packages = ["src/weather_api"]
 
 [dependency-groups]
 dev = [
+    "fakeredis>=2.20.0",
     "httpx>=0.28.1",
     "locust>=2.43.1",
     "mypy>=1.19.1",

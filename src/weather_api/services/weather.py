@@ -6,11 +6,18 @@ import httpx
 import structlog
 from opentelemetry import trace
 
+from weather_api.config import settings
 from weather_api.observability.metrics import (
     EXTERNAL_API_LATENCY,
     EXTERNAL_API_REQUESTS,
 )
 from weather_api.schemas import Coordinates
+from weather_api.services.cache import (
+    cache_get,
+    cache_set,
+    get_coordinates_cache_key,
+    get_weather_cache_key,
+)
 
 logger = structlog.get_logger()
 tracer = trace.get_tracer(__name__)
@@ -62,6 +69,15 @@ async def get_coordinates(city: str) -> Coordinates:
         span.set_attribute("city", city)
         span.set_attribute("api", "open-meteo-geocoding")
 
+        # Check cache first
+        cache_key = get_coordinates_cache_key(city)
+        cached = await cache_get(cache_key)
+        if cached is not None:
+            span.set_attribute("cache_hit", True)
+            logger.info("geocoding_cache_hit", city=city)
+            return Coordinates(**cached)
+
+        span.set_attribute("cache_hit", False)
         logger.info("geocoding_started", city=city)
         start_time = time.perf_counter()
 
@@ -101,6 +117,13 @@ async def get_coordinates(city: str) -> Coordinates:
                 longitude=result["longitude"],
             )
 
+            # Cache the result
+            await cache_set(
+                cache_key,
+                coords.model_dump(),
+                settings.cache_coordinates_ttl,
+            )
+
             EXTERNAL_API_REQUESTS.labels(api="geocoding", status="success").inc()
             span.set_attribute("latitude", coords.latitude)
             span.set_attribute("longitude", coords.longitude)
@@ -131,6 +154,24 @@ async def get_current_weather(
         span.set_attribute("longitude", coords.longitude)
         span.set_attribute("api", "open-meteo-weather")
 
+        # Check cache first
+        cache_key = get_weather_cache_key(coords.latitude, coords.longitude)
+        cached = await cache_get(cache_key)
+        if cached is not None and isinstance(cached, dict):
+            span.set_attribute("cache_hit", True)
+            logger.info(
+                "weather_cache_hit",
+                latitude=coords.latitude,
+                longitude=coords.longitude,
+            )
+            return {
+                "temperature": cached["temperature"],
+                "humidity": cached["humidity"],
+                "wind_speed": cached["wind_speed"],
+                "weather_code": cached["weather_code"],
+            }
+
+        span.set_attribute("cache_hit", False)
         logger.info(
             "weather_fetch_started",
             latitude=coords.latitude,
@@ -168,12 +209,15 @@ async def get_current_weather(
             data = response.json()
             current = data["current"]
 
-            weather_data = {
+            weather_data: dict[str, float | int] = {
                 "temperature": current["temperature_2m"],
                 "humidity": current["relative_humidity_2m"],
                 "wind_speed": current["wind_speed_10m"],
                 "weather_code": current["weather_code"],
             }
+
+            # Cache the result
+            await cache_set(cache_key, weather_data, settings.cache_weather_ttl)
 
             EXTERNAL_API_REQUESTS.labels(api="weather", status="success").inc()
             span.set_attribute("temperature", weather_data["temperature"])

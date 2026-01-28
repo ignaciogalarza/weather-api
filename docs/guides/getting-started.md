@@ -18,12 +18,17 @@
    uv sync
    ```
 
-3. **Run the development server**
+3. **Setup secrets** (for Kubernetes deployment)
+   ```bash
+   ./scripts/setup-secrets.sh
+   ```
+
+4. **Run the development server**
    ```bash
    uv run uvicorn weather_api.main:app --reload
    ```
 
-4. **Test the API**
+5. **Test the API**
    ```bash
    # Health check
    curl http://localhost:8000/health
