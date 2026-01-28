@@ -48,10 +48,10 @@ else
 fi
 echo ""
 
-# Step 3: Run tests with Pytest
-echo -e "${YELLOW}[3/3] Running tests...${NC}"
+# Step 3: Run tests with Pytest (unit + integration tests)
+echo -e "${YELLOW}[3/3] Running tests (unit + integration)...${NC}"
 if uv run pytest -q; then
-    echo -e "${GREEN}✓ All tests passed${NC}"
+    echo -e "${GREEN}✓ All tests passed (unit + integration)${NC}"
 else
     echo -e "${RED}✗ Tests failed${NC}"
     exit 1
