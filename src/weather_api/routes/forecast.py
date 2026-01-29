@@ -2,8 +2,9 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Path, Request
+from fastapi import APIRouter, Depends, HTTPException, Path, Request
 
+from weather_api.auth import validate_auth
 from weather_api.config import settings
 from weather_api.ratelimit import limiter
 from weather_api.schemas import ForecastResponse
@@ -26,6 +27,8 @@ router = APIRouter(tags=["forecast"])
     "wind speed, and weather conditions for the specified city.",
     responses={
         200: {"description": "Weather data retrieved successfully"},
+        401: {"description": "Missing or invalid authentication"},
+        403: {"description": "Invalid API key"},
         404: {"description": "City not found"},
         429: {"description": "Rate limit exceeded"},
         503: {"description": "Weather service unavailable"},
@@ -35,6 +38,7 @@ router = APIRouter(tags=["forecast"])
 async def get_forecast(
     request: Request,
     city: Annotated[str, Path(min_length=1, max_length=100, description="City name")],
+    auth: Annotated[str | None, Depends(validate_auth)] = None,
 ) -> ForecastResponse:
     """Get current weather forecast for a city."""
     try:

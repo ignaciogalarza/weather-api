@@ -8,7 +8,10 @@ from weather_api.config import settings
 
 
 def _get_key_func(request: Request) -> str:
-    """Get rate limit key from request."""
+    """Get rate limit key - API key if available, else IP."""
+    api_key = request.headers.get("X-API-Key")
+    if api_key:
+        return f"key:{api_key}"
     return get_remote_address(request) or "unknown"
 
 

@@ -16,6 +16,7 @@ from weather_api.observability import (
 )
 from weather_api.observability.middleware import RequestLoggingMiddleware
 from weather_api.ratelimit import limiter
+from weather_api.routes.auth import router as auth_router
 from weather_api.routes.forecast import router as forecast_router
 from weather_api.services.cache import close_cache, init_cache
 
@@ -78,6 +79,7 @@ setup_metrics(app)
 instrument_fastapi(app)
 
 # Include routers
+app.include_router(auth_router)
 app.include_router(forecast_router)
 
 

@@ -22,11 +22,13 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         # Clear and bind request context
         structlog.contextvars.clear_contextvars()
+        api_key = request.headers.get("X-API-Key")
         structlog.contextvars.bind_contextvars(
             request_id=request_id,
             method=request.method,
             path=request.url.path,
             client_ip=request.client.host if request.client else None,
+            api_key=f"{api_key[:8]}..." if api_key else None,
         )
 
         logger = structlog.get_logger()
